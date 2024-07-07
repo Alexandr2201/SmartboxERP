@@ -4,7 +4,7 @@ $headers = @{
 }
 
 $body = @{
-    "username" = "u"
+    "username" = "u123456Q"
     "password" = "2345ww"
 }
 

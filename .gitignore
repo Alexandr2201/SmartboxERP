@@ -1,0 +1,20 @@
+# Python и Flask
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Virtual environment
+venv/
+env/
+
+# IDE
+.vscode/
+
+# Локальные настройки Flask
+instance/
+
+# Логи и временные файлы
+*.log
+*.tmp
