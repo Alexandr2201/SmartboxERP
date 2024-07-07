@@ -4,6 +4,9 @@ from flask_cors import CORS
 from db.database import Session  # Изменен импорт
 from endpoints.auth import create_auth_blueprint
 
+#Для развертывания в продакшн рекомендуется использовать серверы,
+#  такие как gunicorn или uwsgi в связке с обратным прокси-сервером, таким как Nginx.
+
 app = Flask(__name__)
 CORS(app)
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Секретный ключ для создания JWT
