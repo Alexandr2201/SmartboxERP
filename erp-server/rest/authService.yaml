@@ -1,0 +1,1288 @@
+openapi: 3.0.3
+info:
+  title: Smartbox ERP. Auth Service
+  description: API сервиса Авторизации, Управления пользователями, Ролями, Сервисами и Подключаемыми модулями
+  version: 1.0.0
+
+servers:
+  - url: https://localhost/api/authService
+  - url: http://localhost/api/authService
+
+tags:
+  - name: Авторизация
+    description: Авторизация пользователя
+  - name: Пользователи
+    description: Управление пользователями
+  - name: Роли
+    description: Управление ролями
+  - name: Права доступа
+    description: Управления правами доступа
+  - name: Сервисы
+    description: Управления сервисами
+  - name: Модули
+    description: Управления модулями
+  - name: Лицензирование
+    description: Управления лицензиями
+
+paths:
+  /token:
+    post:
+      tags:
+        - Авторизация
+      summary: OAuth 2.0 Авторизация
+      description: Performs authentication using the OAuth 2.0 Authorization Framework.
+      operationId: OAuth2IssueToken
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  description: Grant type according to RFC 6749.
+                  enum: 
+                  - password
+                  - refresh_token
+                username:
+                  type: string
+                  description: User name. Used with the `password` grant type.
+                password:
+                  type: string
+                  description: Password. Used with the `password` grant type.
+                refresh_token:
+                  type: string
+                  description: Refresh token. Used with the `refresh_token` grant type.
+              required:
+                - grant_type
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2Result'
+        '400':
+          description: Invalid data input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2Error'
+  
+  /user/me:
+    get:
+      security:
+      - BearerAuth: []      
+      summary: Получение информации о текущем пользователе
+      description: Возвращает информацию о текущем авторизованном пользователе
+      tags:
+        - Пользователи
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /user:
+    get:
+      security:
+      - bearer: []
+      summary: Получение списка всех пользователей
+      description: Получение списка всех пользователей системы
+      tags:
+        - Пользователи
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+    post:
+      security:
+      - bearer: []
+      summary: Создание пользователя
+      description: Создание нового пользователя
+      tags:
+        - Пользователи
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /user/{userUid}:
+    get:
+      security:
+      - bearer: []
+      summary: Получение информации о пользователе
+      description: Получение информации о конкретном пользователе
+      tags:
+        - Пользователи
+      parameters:
+        - name: userUid
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+    patch:
+      security:
+      - bearer: []
+      summary: Редактирование пользователя
+      description: Редактирование пользователя с помощью механизма патчинга
+      tags:
+        - Пользователи
+      parameters:
+        - name: userUid
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+    delete:
+      security:
+      - bearer: []
+      summary: Удаление пользователя
+      description: Удаление выбранного пользователя
+      tags:
+        - Пользователи
+      parameters:
+        - name: userUid
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+
+  /role:
+    get:
+      security:
+      - bearer: []
+      summary: Получение списка ролей
+      description: Получение списка всех ролей
+      tags:
+        - Роли
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RoleImput'
+    post:
+      security:
+      - bearer: []
+      summary: Создание роли
+      description: Создание новой роли
+      tags:
+        - Роли
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleImput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RoleImput'
+
+  /role/{roleUid}:
+    get:
+      security:
+      - bearer: []
+      summary: Получение информации о роли
+      description: Получение информации о конкретной роли
+      tags:
+        - Роли
+      parameters:
+        - name: roleUid
+          in: path
+          description: Идентификатор роли
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+    patch:
+      security:
+      - bearer: []
+      summary: Редактирование роли
+      description: Редактирование роли с помощью механизма патчинга
+      tags:
+        - Роли
+      parameters:
+        - name: roleUid
+          in: path
+          description: Идентификатор роли
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+    delete:
+      security:
+      - bearer: []
+      summary: Удаление роли
+      description: Удаление выбранной роли
+      tags:
+        - Роли
+      parameters:
+        - name: roleUid
+          in: path
+          description: Идентификатор роли
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+
+  /role/{roleUid}/permissions:
+    post:
+      security:
+      - bearer: []
+      summary: Назначение пермиссий роли
+      description: Назначение пермиссий для существующей роли
+      tags:
+        - Роли
+      parameters:
+        - name: roleUid
+          in: path
+          description: Идентификатор роли
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        description: Список пермиссий для назначения
+        content:
+          application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/Permission'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+  /modules:
+    get:
+      security:
+      - bearer: []
+      summary: Получение списка модулей
+      description: Получение списка всех модулей в сервисе
+      tags:
+        - Модули
+      parameters:
+        - $ref: '#/components/parameters/ServiceUidParameter'
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/ServiceUidParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Module'
+    post:
+      security:
+      - bearer: []
+      summary: Регистрация модуля
+      description: Регистрация нового модуля в сервисе
+      tags:
+        - Модули
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleImput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Module'
+
+  /modules/{moduleUid}:
+    get:
+      security:
+      - bearer: []
+      summary: Получение информации о модуле
+      description: Получение информации о конкретном модуле
+      tags:
+        - Модули
+      parameters:
+        - name: moduleUid
+          in: path
+          description: Идентификатор модуля
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Module'
+    patch:
+      security:
+      - bearer: []
+      summary: Редактирование модуля
+      description: Редактирование модуля с помощью механизма патчинга
+      tags:
+        - Модули
+      parameters:
+        - name: moduleUid
+          in: path
+          description: Идентификатор модуля
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Module'
+    delete:
+      security:
+      - bearer: []
+      summary: Удаление модуля
+      description: Удаление выбранного модуля
+      tags:
+        - Модули
+      parameters:
+        - name: moduleUid
+          in: path
+          description: Идентификатор модуля
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+
+  /services:
+    get:
+      security:
+      - bearer: []
+      summary: Получение списка всех сервисов
+      description: Получение списка всех зарегистрированных сервисов
+      tags:
+        - Сервисы
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Service'
+    post:
+      security:
+      - bearer: []
+      summary: Регистрация нового сервиса
+      description: Регистрация нового сервиса
+      tags:
+        - Сервисы
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Service'
+
+  /services/{serviceUid}:
+    get:
+      security:
+      - bearer: []
+      summary: Получение информации о конкретном сервисе
+      description: Получение информации о конкретном сервисе
+      tags:
+        - Сервисы
+      parameters:
+        - name: serviceUid
+          in: path
+          description: Идентификатор сервиса
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Service'
+    patch:
+      security:
+      - bearer: []
+      summary: Обновление информации о конкретном сервисе
+      description: Обновление информации о конкретном сервисе
+      tags:
+        - Сервисы
+      parameters:
+        - name: serviceUid
+          in: path
+          description: Идентификатор сервиса
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Service'
+    delete:
+      security:
+      - bearer: []
+      summary: Удаление конкретного сервиса
+      description: Удаление конкретного сервиса
+      tags:
+        - Сервисы
+      parameters:
+        - name: serviceUid
+          in: path
+          description: Идентификатор сервиса
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+
+  /permissions:
+    get:
+      security:
+      - bearer: []
+      summary: Получение списка всех пермиссий
+      description: Получение списка всех пермиссий системы
+      tags:
+        - Права доступа
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+    post:
+      security:
+      - bearer: []
+      summary: Регистрация новой пермиссии
+      description: Регистрация новой пермиссии в системе
+      tags:
+        - Права доступа
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Permission'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+
+  /permissions/{permissionUid}:
+    get:
+      security:
+      - bearer: []
+      summary: Получение информации о праве доступа
+      description: Получение информации о конкретном праве доступа
+      tags:
+        - Права доступа
+      parameters:
+        - name: permissionUid
+          in: path
+          description: Идентификатор пермиссии
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+    patch:
+      security:
+      - bearer: []
+      summary: Обновление информации о праве доступа
+      description: Обновление информации о праве доступа
+      tags:
+        - Права доступа
+      parameters:
+        - name: permissionUid
+          in: path
+          description: Идентификатор пермиссии
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+    delete:
+      security:
+      - bearer: []
+      summary: Удаление права доступа
+      description: Удаление выбранной права доступа
+      tags:
+        - Права доступа
+      parameters:
+        - name: permissionUid
+          in: path
+          description: Идентификатор пермиссии
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+
+components:
+  schemas:
+    OAuth2Result:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Access token.
+        token_type:
+          type: string
+          description: Token type.
+        refresh_token:
+          type: string
+          description: Refresh token.
+        expires_in:
+          type: integer
+          format: int32
+          description: Date and time when an access token will expire.
+      required:
+        - access_token
+        - token_type
+        - expires_in
+
+    OAuth2Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type.
+          enum:
+            - invalid_request
+            - invalid_client
+            - invalid_grant
+            - unauthorized_client
+            - unsupported_grant_type
+            - invalid_scope
+        error_description:
+          type: string
+          description: Error description.
+        error_uri:
+          type: string
+          description: Error URI.
+      required:
+        - error
+        - error_description
+    
+    Response:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/ResponseMetadata'
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/User'
+            - $ref: '#/components/schemas/RoleImput'
+            - $ref: '#/components/schemas/Role'
+            - $ref: '#/components/schemas/Module'
+            - $ref: '#/components/schemas/Service'
+            - $ref: '#/components/schemas/Permission'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+
+    ResponseMetadata:
+      type: object
+      properties:
+        pagingInfo:
+          $ref: '#/components/schemas/PagingInformation'
+      nullable: true
+
+    PagingInformation:
+      type: object
+      required:
+        - total
+        - count
+        - offset
+      properties:
+        total:
+          type: integer
+          format: int32
+          description: Number of total resources.
+        count:
+          type: integer
+          format: int32
+          description: Number of resources on the current page.
+        offset:
+          type: integer
+          format: int32
+          description: Number of resources that are skipped.
+
+    EmptyResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+        data:
+          type: object
+          readOnly: true
+        meta:
+          $ref: '#/components/schemas/ResponseMetadata'
+      nullable: true
+
+    ResponseError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+      nullable: true
+
+    JsonPatches:
+      type: array
+      items:
+        $ref: '#/components/schemas/JsonPatch'
+    JsonPatch:
+      required:
+        - op
+        - value
+        - path
+      type: object
+      properties:
+        op:
+          enum:
+            - add
+            - replace
+            - test
+            - remove
+            - move
+            - copy
+          type: string
+          description: Performed operation.
+        value:
+          type: string
+          description: 'Value that is added, replaced, tested or removed by the PATCH operation.'
+        from:
+          type: string
+          description: JSON Pointer containing path to a location from which data is moved or copied.
+          nullable: true
+        path:
+          type: string
+          description: JSON Pointer containing path to a target location where the PATCH operation is performed.
+      externalDocs:
+        description: Link to RFC 6902.
+        url: https://tools.ietf.org/html/rfc6902
+
+    FilterExpression:
+        type: object
+        required:
+          - operation
+        properties:
+          property:
+            description: Путь к требуемому свойству ресурса
+            nullable: true
+            type: string
+          items:
+            description: Внутренние выражения. Могут использоваться только с операциями and, or и not.
+            type: array
+            nullable: true
+            items:
+              $ref: '#/components/schemas/FilterExpression'
+          operation:
+            description: Операция фильтрации
+            enum:
+              - eq: Равно
+              - neq: Не равно
+              - gt: Больше
+              - lt: Меньше
+              - gte: Больше или равно
+              - lte: Меньше или равно
+              - in: Включает значения
+              - exclusiveOr: Возвращает ресурсы, которые соответствуют одному из выражений фильтрации
+              - or: Возвращает ресурсы, которые соответствуют одному или нескольким выражениям фильтрации
+              - and: Возвращает ресурсы, которые соответствуют всем выражениям фильтрации
+              - not: Возвращает ресурсы, которые не соответствуют всем выражениям фильтрации
+            type: string
+          collation:
+            $ref: '#/components/schemas/Collation'
+          value:
+            description: 'Resource property value.'
+            type: object
+            nullable: true
+    
+    SortExpression:
+      type: object
+      required: 
+        - property
+        - direction
+      properties:
+        property:
+          description: 'Путь к требуемому свойству ресурса.'
+          type: string
+        direction:
+          description: 'Направление сортировки.'
+          enum:
+            - ascending
+            - descending
+          type: string
+          default: ascending
+        collation:
+          $ref: '#/components/schemas/Collation'
+
+    SelectExpression:
+      type: object
+      required:
+        - propertyPath
+      properties:
+        propertyPath:
+          type: string
+
+    Collation:
+      description: Тип правил, определяющих способ сравнения указанных значений с значениями свойств ресурсов
+      type: string
+      nullable: true
+      enum:
+        - ordinal: сравнивает строки посимвольно
+        - ignorecase: сравнивает строки посимвольно, игнорируя регистр символов
+        - lexicographic: сравнивает слова с словами и числа с числами
+
+    User:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        userUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        username:
+          type: string
+          minLength: 3
+          maxLength: 128
+        password:
+          type: string
+          minLength: 8
+          maxLength: 255
+        personUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        description:
+          type: string
+          description: Дополнительная информация о пользователе
+          minLength: 1
+          maxLength: 255
+  
+    RoleImput:
+      type: object
+      properties:
+        roleUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        roleName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          description: Описание роли
+          minLength: 1
+          maxLength: 255
+
+    Role:
+      type: object
+      properties:
+        roleUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        roleName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          description: Описание роли
+          minLength: 1
+          maxLength: 255
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicePermissions'
+          nullable: true
+
+    ServicePermissions:
+      type: object
+      properties:
+        serviceUid:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModulePermissions'
+    
+    ModulePermissions:
+      type: object
+      properties:
+        moduleUid:
+          type: string
+          format: uuid
+        moduleName:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+    
+    Permission:
+      type: object
+      properties:
+        permissionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        permissionName:
+          type: string
+          description: Название пермиссии
+          minLength: 3
+          maxLength: 255
+        actions:
+          type: array
+          items:
+            type: string
+            enum:
+            - create
+            - read
+            - edit
+            - delete
+            - full
+        description:
+          type: string
+          description: Описание пермиссии
+          maxLength: 2048
+          nullable: true
+        serviseUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        moduleUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          nullable: true
+      required:
+        - permissionUid
+        - serviseUid
+
+    Service:
+      type: object
+      properties:
+        serviceUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Уникальный идентификатор сервиса.
+          nullable: true
+        serviceName:
+          type: string
+          description: Наименование сервиса.
+          minLength: 3
+          maxLength: 255
+        location:
+          type: string
+          format: uri
+          description: Расположение сервиса.
+        description:
+          type: string
+          description: Описание сервиса.
+          maxLength: 2048
+        status:
+          type: string
+          description: Состояние модуля
+          enum:
+            - active
+            - disabled
+            - error
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+          description: Список модулей, принадлежащих сервису.
+          nullable: true
+    
+    ModuleImput:
+      type: object
+      properties:
+        moduleUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        serviceUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор сервиса, к которому принадлежит модуль
+
+    Module:
+      type: object
+      properties:
+        moduleUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        moduleName:
+          type: string
+          description: Название модуля
+          minLength: 3
+          maxLength: 255
+        description:
+          type: string
+          description: Описание модуля
+          maxLength: 2048
+        serviceUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор сервиса, к которому принадлежит модуль
+        registrationDate:
+          type: string
+          format: date-time
+          description: Дата регистрации модуля в формате timestamp
+        developer:
+          type: string
+          description: Информация о разработчике модуля
+        status:
+          type: string
+          description: Состояние модуля
+          enum:
+            - active
+            - disabled
+            - error
+            - unknown
+        permissions:
+          type: array
+          items:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'  
+  
+  parameters:
+    SortParameter:
+      name: sort
+      in: query
+      description: 'Массив выражений сортировки для параметра `sort` запроса.'
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SortExpression'
+
+    FilterParameter:
+      description: Массив выражений фильтрации для параметра `filter` запроса
+      in: query
+      name: filter
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/FilterExpression'
+
+    SelectParameter:
+      name: select
+      in: query
+      description: 'Массив выражений выборки для параметра `select` запроса.'
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SelectExpression'
+
+    OffsetParameter:
+      name: offset
+      in: query
+      description: Количество ресурсов, исключаемых из вывода запроса.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+
+    LimitParameter:
+      name: limit
+      in: query
+      description: Количество ресурсов, которые должны быть возвращены в выводе.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 500
+        default: 100
+
+    ServiceUidParameter:
+      name: serviceUid
+      in: query
+      description: Идентификатор сервиса
+      required: true
+      schema:
+        type: string
+        format: uuid
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

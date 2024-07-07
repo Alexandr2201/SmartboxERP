@@ -1,0 +1,2602 @@
+openapi: 3.0.3
+info:
+  title: Smartbox ERP. Master Data Hub
+  description: API сервиса структуры компании и справочников
+  version: 1.0.0
+
+servers:
+  - url: https://localhost/api/masterDataHub
+  - url: http://localhost/api/masterDataHub
+
+tags:
+  - name: Адресный классификатор ToDo
+    description: Адресный классификатор ToDo
+  - name: Номенклатура ToDo
+    description: Номенклатура
+  - name: Организации
+    description: Организации
+  - name: Банковские счета
+    description: Банковские счета
+  - name: Кассы
+    description: Кассы
+  - name: Структура организации
+    description: Структура организации (подразделения) и ответственные лица (подписанты)
+  - name: Физические лица
+    description: физические лица
+  - name: Классификаторы
+    description: Различные классификаторы и их синхронизация
+
+paths:
+  /classifiers/currencies:
+    get:
+      summary: Получение коллекции валют
+      description: Возвращает список всех доступных валют
+      tags:
+        - Классификаторы
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Currency'
+    post:
+      summary: Создание валюты
+      description: Создает новую валюту
+      tags:
+        - Классификаторы
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Currency'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Currency'
+
+  /classifiers/currencies/{currencyId}:
+    patch:
+      summary: Изменение валюты
+      description: Изменяет указанную валюту
+      tags:
+        - Классификаторы
+      parameters:
+        - name: currencyId
+          in: path
+          description: Идентификатор валюты
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Currency'                  
+    delete:
+      summary: Удаление валюты
+      description: Удаляет указанную валюту
+      tags:
+        - Классификаторы
+      parameters:
+        - name: currencyId
+          in: path
+          description: Идентификатор валюты
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Успешное удаление
+
+  /classifiers/currencies/update:
+    post:
+      summary: Обновление коллекции валют с сайта Центробанка
+      description: Обновляет коллекцию валют, получая данные с сайта Центробанка
+      tags:
+        - Классификаторы
+      parameters:
+        - name: downloadUrl
+          in: query
+          description: URL для скачивания файла с данными о валютах
+          required: false
+          schema:
+            type: string
+            default: http://www.cbr.ru/vfs/mcirabis/BIK/okv.zip
+        - name: fileFormat
+          in: query
+          description: Формат файла с данными о валютах
+          required: false 
+          schema:
+            type: string
+            default: DBF
+        - name: isArchived
+          in: query
+          description: Флаг, указывающий, является ли файл заархивированным
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Успешное обновление
+        '500':
+          description: Ошибка при обновлении
+
+  /classifiers/banks:
+    get:
+      summary: Получение коллекции банков
+      description: Возвращает список всех доступных банков
+      tags:
+        - Классификаторы
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bank'
+    post:
+      summary: Создание банка
+      description: Создает новый банк
+      tags:
+        - Классификаторы
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bank'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bank'
+
+  /classifiers/banks/{bankId}:
+    get:
+      summary: Получение информации о выбранном банке
+      description: Возвращает информацию о выбранном банке по Uid
+      tags:
+        - Классификаторы
+      parameters:
+        - name: bankId
+          in: path
+          description: Идентификатор банка
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bank'
+        '404':
+          description: Банк не найден
+    patch:
+      summary: Изменение банка
+      description: Изменяет указанный банк
+      tags:
+        - Классификаторы
+      parameters:
+        - name: bankId
+          in: path
+          description: Идентификатор банка
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bank'                  
+    delete:
+      summary: Удаление банка
+      description: Удаляет указанный банк
+      tags:
+        - Классификаторы
+      parameters:
+        - name: bankId
+          in: path
+          description: Идентификатор банка
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Успешное удаление
+
+  /classifiers/banks/update:
+    post:
+      summary: Обновление классификатора банков с сайта Центробанка
+      description: Обновляет классификатор банков, получая данные с сайта Центробанка
+      tags:
+        - Классификаторы
+      parameters:
+        - name: downloadUrl
+          in: query
+          description: URL для скачивания файла с данными о банках
+          required: false
+          schema:
+            type: string
+            default: http://www.cbr.ru/s/newbik
+        - name: fileFormat
+          in: query
+          description: Формат файла с данными о банках
+          required: false 
+          schema:
+            type: string
+            default: xml
+        - name: isArchived
+          in: query
+          description: Флаг, указывающий, является ли файл заархивированным
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Успешное обновление
+        '500':
+          description: Ошибка при обновлении
+
+  /classifiers/countries:
+    get:
+      summary: Получение коллекции стран
+      description: Возвращает список всех стран
+      tags:
+        - Классификаторы
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Country'                  
+    post:
+      summary: Создание страны
+      description: Создает новую страну
+      tags:
+        - Классификаторы
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Country'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Country'                  
+  /classifiers/countries/{countryId}:
+    delete:
+      summary: Удаление страны
+      description: Удаляет указанную страну
+      tags:
+        - Классификаторы
+      parameters:
+        - name: countryId
+          in: path
+          description: Номер страны
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Успешное удаление
+  
+  /countries/update:
+    post:
+      summary: Обновление коллекции стран с сайта обновления классификаторов РФ
+      description: Обновляет коллекцию стран, получая данные с сайта обновления классификаторов РФ
+      tags:
+        - Классификаторы
+      parameters:
+        - name: downloadUrl
+          in: query
+          description: URL для скачивания файла с данными о странах
+          required: false
+          schema:
+            type: string
+            default: https://classifikators.ru/assets/downloads/oksm/oksm.xlsx
+        - name: fileFormat
+          in: query
+          description: Формат файла с данными о странах
+          required: false
+          schema:
+            type: string
+            default: xlsx
+        - name: isArchived
+          in: query
+          description: Флаг, указывающий, является ли файл заархивированным
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Успешное обновление
+        '500':
+          description: Ошибка при обновлении
+  
+  /person:
+    get:
+      summary: Получение списка физических лиц
+      description: Возвращает список всех физических лиц
+      tags:
+        - Физические лица
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Person'
+    post:
+      summary: Создание физического лица
+      description: Создает новое физическое лицо
+      tags:
+        - Физические лица
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Person'
+
+  /person/{personUid}:
+    get:
+      summary: Получение физического лица по Uid
+      description: Возвращает данные физического лица по указанному Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Person'
+    patch:
+      summary: Редактирование физического лица по Uid
+      description: Изменяет данные физического лица по указанному Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Person'
+    delete:
+      summary: Удаление физического лица по Uid
+      description: Удаляет физическое лицо по Uid или деактивирует его в зависимости от параметра deactivationOnly
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: deactivationOnly
+          in: query
+          description: Флаг, указывающий, выполнить только деактивацию без удаления
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: Успешное удаление или деактивация
+
+  /person/{personUid}/documents:
+    get:
+      summary: Получение списка документов по физическому лицу
+      description: Возвращает список документов, связанных с указанным физическим лицом по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Document'
+    post:
+      summary: Создание документа физическому лицу - ToDo
+      description: Создание документа физическому лицу по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Document'
+
+  /person/{personUid}/documents/{documentUid}:
+    get:
+      summary: Получение списка документа по Uid
+      description: Возвращает документ по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: documentUid
+          in: path
+          description: Uid документа
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Document'
+    patch:
+      summary: Редактирование документа по Uid и Uid физического лица
+      description: Изменяет данные документа по указанным Uid физического лица и документа
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: documentUid
+          in: path
+          description: Uid документа
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Document'
+    delete:
+      summary: Удаление документа по Uid и Uid физического лица
+      description: Удаляет документ по указанным Uid физического лица и документа
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: documentUid
+          in: path
+          description: Uid документа
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '204':
+          description: Успешное удаление документа
+  
+  /persons/{personUid}/contact:
+    get:
+      summary: Получение списка контактов по физическому лицу
+      description: Возвращает список контактов, связанных с указанным физическим лицом по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Contact'
+    post:
+      summary: Создание контакта физическому лицу - ToDo
+      description: Создание контакта физическому лицу по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Contact'
+
+  /persons/{personUid}/contacts/{contactUid}:
+    get:
+      summary: Получение контакта по Uid
+      description: Возвращает контакт по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: documentUid
+          in: path
+          description: Uid документа
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Document'
+    patch:
+      summary: Редактирование контакта по Uid и Uid физического лица
+      description: Изменяет данные контакта по указанным Uid физического лица и контакта
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: contactUid
+          in: path
+          description: Uid контакта
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Contact'
+    delete:
+      summary: Удаление контакта по Uid и Uid физического лица
+      description: Удаляет контакт по указанным Uid физического лица и контакта
+      tags:
+        - Физические лица
+      parameters:
+        - name: personUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: contactUid
+          in: path
+          description: Uid контакта
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '204':
+          description: Успешное удаление контакта
+
+  /personGroup:
+    get:
+      summary: Получение списка групп физических лиц
+      tags:
+        - Физические лица
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonGroup'
+    post:
+      summary: Создание новой группы физических лиц
+      tags:
+        - Физические лица
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonGroup'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonGroup'
+        '400':
+          description: Некорректный запрос
+
+  /personGroup/{personGroupUid}:
+    get:
+      summary: Получение группы физических лиц по Uid
+      description: Возвращает группу физических лиц по Uid
+      tags:
+        - Физические лица
+      parameters:
+        - name: personGroupUid
+          in: path
+          description: Uid физического лица
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: documentUid
+          in: path
+          description: Uid документа
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonGroup'
+    patch:
+      summary: Редактирование группы физических лиц
+      tags:
+        - Физические лица
+      parameters:
+        - name: personGroupUid
+          in: path
+          required: true
+          description: Идентификатор группы
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonGroup'
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Группа не найдена
+    delete:
+      summary: Удаление группы физических лиц
+      tags:
+        - Физические лица
+      parameters:
+        - name: personGroupUid
+          in: path
+          required: true
+          description: Идентификатор группы
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: deactivateOnly
+          in: query
+          description: Флаг, указывающий на деактивацию группы без удаления
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Успешное удаление группы
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Группа не найдена
+
+  /division:
+    get:
+      summary: Получение списка структур организации
+      tags:
+        - Структура организации
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Division'
+    post:
+      summary: Создание новой структуры организации
+      tags:
+        - Структура организации
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Division'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Division'
+        '400':
+          description: Некорректный запрос
+
+  /division/{divisionUid}:
+    get:
+      summary: Получение структуры организации по UID
+      tags:
+        - Структура организации
+      parameters:
+        - name: divisionUid
+          in: path
+          required: true
+          description: Идентификатор структуры организации
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Division'
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Структура организации не найдена
+    patch:
+      summary: Редактирование структуры организации
+      tags:
+        - Структура организации
+      parameters:
+        - name: divisionUid
+          in: path
+          required: true
+          description: Идентификатор структуры организации
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Division'
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Структура организации не найдена
+    delete:
+      summary: Удаление структуры организации
+      tags:
+        - Структура организации
+      parameters:
+        - name: divisionUid
+          in: path
+          required: true
+          description: Идентификатор структуры организации
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: Успешное удаление структуры организации
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Структура организации не найдена
+
+  /responsibilities:
+    get:
+      summary: Получение списка ответственных лиц
+      description: Возвращает список всех ответственных лиц
+      tags:
+        - Структура организации
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Responsibility'
+    post:
+      summary: Создание ответственного лица
+      description: Создает новую запись об ответственном лице
+      tags:
+        - Структура организации
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Responsibility'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Responsibility'
+
+  /responsibilities/{responsibilityUid}:
+    get:
+      summary: Получение ответственного лица по Uid
+      description: Возвращает ответственное лицо по указанному Uid
+      tags:
+        - Структура организации
+      parameters:
+        - name: responsibilityUid
+          in: path
+          required: true
+          description: Идентификатор ответственного лица
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Responsibility'
+        '404':
+          description: Ответственное лицо не найдено
+
+    patch:
+      summary: Редактирование ответственного лица
+      description: Редактирует информацию об ответственном лице по указанному Uid
+      tags:
+        - Структура организации
+      parameters:
+        - name: responsibilityUid
+          in: path
+          required: true
+          description: Идентификатор ответственного лица
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Responsibility'
+        '404':
+          description: Ответственное лицо не найдено
+
+    delete:
+      summary: Удаление ответственного лица
+      description: Удаляет ответственное лицо по указанному Uid
+      tags:
+        - Структура организации
+      parameters:
+        - name: responsibilityUid
+          in: path
+          required: true
+          description: Идентификатор ответственного лица
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '204':
+          description: Успешное удаление
+        '404':
+          description: Ответственное лицо не найдено
+
+  /cashboxes:
+    get:
+      summary: Получение списка всех касс
+      description: Возвращает список всех касс
+      tags:
+        - Кассы
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Cashbox'
+    post:
+      summary: Создание кассы
+      description: Создает новую кассу
+      tags:
+        - Кассы
+      requestBody:
+        description: Информация о новой кассе
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cashbox'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Cashbox'
+
+  /cashboxes/{cashboxUid}:
+    get:
+      summary: Получение кассы по Uid
+      description: Возвращает информацию о кассе по Uid
+      tags:
+        - Кассы
+      parameters:
+        - name: cashboxUid
+          in: path
+          description: Идентификатор кассы
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Cashbox'
+    patch:
+      summary: Редактирование кассы по Uid
+      description: Обновляет информацию о кассе по Uid
+      tags:
+        - Кассы
+      parameters:
+        - name: cashboxUid
+          in: path
+          description: Идентификатор кассы
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        description: Информация для обновления кассы
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Cashbox'
+    delete:
+      summary: Удаление кассы по Uid
+      description: Удаляет кассу по Uid
+      tags:
+        - Кассы
+      parameters:
+        - name: cashboxUid
+          in: path
+          description: Идентификатор кассы
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: Успешное удаление кассы
+        '404':
+          description: Касса не найдена
+
+  /organization/{organizationUid}/bankAccount:
+    get:
+      summary: Получение списка всех банковских счетов организации
+      tags:
+        - Банковские счета
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: Успешное получение списка банковских счетов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BankAccount'
+    post:
+      summary: Создание нового банковского счета для организации
+      tags:
+        - Банковские счета
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankAccount'
+      responses:
+        '200':
+          description: Успешное получение списка банковских счетов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BankAccount'
+
+  /organization/{organizationUid}/bankAccount{bankAccountUid}:
+    get:
+      summary: Получение информации о банковском счете по Uid
+      tags:
+        - Банковские счета
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: bankAccountUid
+          in: path
+          description: Идентификатор банковского счета
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: Успешное получение списка банковских счетов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BankAccount'
+    patch:
+      summary: Редактирование информации о банковском счете по Uid
+      tags:
+        - Банковские счета
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: bankAccountUid
+          in: path
+          description: Идентификатор банковского счета
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: Успешное получение списка банковских счетов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BankAccount'
+    delete:
+      summary: Удаление банковского счета по Uid
+      tags:
+        - Банковские счета
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        - name: bankAccountUid
+          in: path
+          description: Идентификатор банковского счета
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '204':
+          description: Успешное удаление банковского счета
+        '404':
+          description: Банковский счет не найден
+        '500':
+          description: Ошибка при удалении банковского счета
+
+  /organization:
+    get:
+      summary: Получение списка всех организаций
+      tags:
+        - Организации
+      parameters:
+        - $ref: '#/components/parameters/SortParameter'
+        - $ref: '#/components/parameters/FilterParameter'
+        - $ref: '#/components/parameters/SelectParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Organization'
+    post:
+      summary: Создание новой организации
+      tags:
+        - Организации
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Organization'
+
+  /organization/{organizationUid}:
+    get:
+      summary: Получение информации об организации Uid
+      tags:
+        - Организации
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Organization'
+    patch:
+      summary: Редактирование параметров организации по Uid
+      tags:
+        - Организации
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatches'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Organization'
+    delete:
+      summary: Удаление организации по Uid
+      tags:
+        - Организации
+      parameters:
+        - name: organizationUid
+          in: query
+          description: Идентификатор организации
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      responses:
+        '204':
+          description: Успешное удаление банковского счета
+        '404':
+          description: Банковский счет не найден
+        '500':
+          description: Ошибка при удалении банковского счета
+
+
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/ResponseMetadata'
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/Currency'
+            - $ref: '#/components/schemas/Bank'
+            - $ref: '#/components/schemas/BankAccount'
+            - $ref: '#/components/schemas/Country'
+            - $ref: '#/components/schemas/Person'
+            - $ref: '#/components/schemas/Contact'
+            - $ref: '#/components/schemas/Document'
+            - $ref: '#/components/schemas/PersonGroup'
+            - $ref: '#/components/schemas/Division'
+            - $ref: '#/components/schemas/Responsibility'
+            - $ref: '#/components/schemas/Cashbox'
+            - $ref: '#/components/schemas/Organization'
+                        
+
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+
+    ResponseMetadata:
+      type: object
+      properties:
+        pagingInfo:
+          $ref: '#/components/schemas/PagingInformation'
+      nullable: true
+
+    PagingInformation:
+      type: object
+      required:
+        - total
+        - count
+        - offset
+      properties:
+        total:
+          type: integer
+          format: int32
+          description: Number of total resources.
+        count:
+          type: integer
+          format: int32
+          description: Number of resources on the current page.
+        offset:
+          type: integer
+          format: int32
+          description: Number of resources that are skipped.
+
+    EmptyResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+        data:
+          type: object
+          readOnly: true
+        meta:
+          $ref: '#/components/schemas/ResponseMetadata'
+      nullable: true
+
+    ResponseError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+      nullable: true
+
+    JsonPatches:
+      type: array
+      items:
+        $ref: '#/components/schemas/JsonPatch'
+    JsonPatch:
+      required:
+        - op
+        - value
+        - path
+      type: object
+      properties:
+        op:
+          enum:
+            - add
+            - replace
+            - test
+            - remove
+            - move
+            - copy
+          type: string
+          description: Performed operation.
+        value:
+          type: string
+          description: 'Value that is added, replaced, tested or removed by the PATCH operation.'
+        from:
+          type: string
+          description: JSON Pointer containing path to a location from which data is moved or copied.
+          nullable: true
+        path:
+          type: string
+          description: JSON Pointer containing path to a target location where the PATCH operation is performed.
+      externalDocs:
+        description: Link to RFC 6902.
+        url: https://tools.ietf.org/html/rfc6902
+
+    FilterExpression:
+        type: object
+        required:
+          - operation
+        properties:
+          property:
+            description: Путь к требуемому свойству ресурса
+            nullable: true
+            type: string
+          items:
+            description: Внутренние выражения. Могут использоваться только с операциями and, or и not.
+            type: array
+            nullable: true
+            items:
+              $ref: '#/components/schemas/FilterExpression'
+          operation:
+            description: Операция фильтрации
+            enum:
+              - eq: Равно
+              - neq: Не равно
+              - gt: Больше
+              - lt: Меньше
+              - gte: Больше или равно
+              - lte: Меньше или равно
+              - in: Включает значения
+              - exclusiveOr: Возвращает ресурсы, которые соответствуют одному из выражений фильтрации
+              - or: Возвращает ресурсы, которые соответствуют одному или нескольким выражениям фильтрации
+              - and: Возвращает ресурсы, которые соответствуют всем выражениям фильтрации
+              - not: Возвращает ресурсы, которые не соответствуют всем выражениям фильтрации
+            type: string
+          collation:
+            $ref: '#/components/schemas/Collation'
+          value:
+            description: 'Resource property value.'
+            type: object
+            nullable: true
+    
+    SortExpression:
+      type: object
+      required: 
+        - property
+        - direction
+      properties:
+        property:
+          description: 'Путь к требуемому свойству ресурса.'
+          type: string
+        direction:
+          description: 'Направление сортировки.'
+          enum:
+            - ascending
+            - descending
+          type: string
+          default: ascending
+        collation:
+          $ref: '#/components/schemas/Collation'
+
+    SelectExpression:
+      type: object
+      required:
+        - propertyPath
+      properties:
+        propertyPath:
+          type: string
+
+    Collation:
+      description: Тип правил, определяющих способ сравнения указанных значений с значениями свойств ресурсов
+      type: string
+      nullable: true
+      enum:
+        - ordinal: сравнивает строки посимвольно
+        - ignorecase: сравнивает строки посимвольно, игнорируя регистр символов
+        - lexicographic: сравнивает слова с словами и числа с числами
+
+    Currency:
+      type: object
+      properties:
+        currencyId:
+          type: integer
+          description: Идентификатор валюты
+          minimum: 1
+          maximum: 999
+        code:
+          type: integer
+          description: Код валюты
+          minimum: 1
+          maximum: 999
+        isoDig:
+          type: integer
+          description: Цифровой код ISO
+          minimum: 1
+          maximum: 999
+        isoLat3:
+          type: string
+          description: Трехбуквенный код ISO
+          minimum: 1
+          maxLength: 3
+        nameRus:
+          type: string
+          description: Название валюты на русском языке
+          maxLength: 128
+        isUsed:
+          type: boolean
+          description: Флаг, указывающий, используется ли валюта в системе.
+          default: false
+        isPrimary:
+          type: boolean
+          description: Флаг, указывающий, является ли валюта основной валютой учета.
+          default: false
+      required:
+        - currencyId
+        - code
+        - isoDig
+        - isoLat3
+        - nameRus
+    Bank:
+      type: object
+      properties:
+        bic:
+          type: string
+          pattern: '^\d{9}$'
+          description: БИК
+        participantInfo:
+          $ref: '#/components/schemas/BankParticipantInfo'
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountCBR'
+      required:
+        - bic
+        - participantInfo
+
+    BankParticipantInfo:
+      type: object
+      properties:
+        participantStatus:
+          type: string
+          description: Статус участника
+        uid:
+          type: string
+          description: Уникальный идентификатор
+          maxLength: 128
+        xchType:
+          type: integer
+          description: Тип обмена
+        srvcs:
+          type: integer
+          description: Код услуги
+        ptType:
+          type: integer
+          description: Тип участника
+        dateIn:
+          type: string
+          format: date
+          description: Дата регистрации
+        adr:
+          type: string
+          description: Адрес
+          maxLength: 128
+        nnp:
+          type: string
+          description: Населенный пункт
+          maxLength: 128
+        tnp:
+          type: string
+          description: Тип населенного пункта
+          maxLength: 128
+        ind:
+          type: string
+          description: Почтовый индекс
+          maxLength: 128
+        rgn:
+          type: string
+          description: Код региона
+          maxLength: 128
+        cntrCd:
+          type: string
+          description: Код страны
+          maxLength: 128
+        nameP:
+          type: string
+          description: Название участника
+          maxLength: 128
+      required:
+        - participantStatus
+        - uid
+        - xchType
+        - srvcs
+        - ptType
+        - dateIn
+        - adr
+        - nnp
+        - tnp
+        - ind
+        - rgn
+        - cntrCd
+        - nameP
+
+    AccountCBR:
+      type: object
+      properties:
+        dateIn:
+          type: string
+          format: date
+          description: Дата регистрации
+        accountStatus:
+          type: string
+          description: Статус счета
+        accountCBRBIC:
+          type: string
+          pattern: '^\d{9}$'
+          description: БИК счета
+        ck:
+          type: string
+          description: Корреспондентский счет
+          maxLength: 128
+        regulationAccountType:
+          type: string
+          description: Тип регуляционного счета
+          maxLength: 128
+        account:
+          type: string
+          description: Счет
+          maxLength: 128
+      required:
+        - dateIn
+        - accountStatus
+        - accountCBRBIC
+        - ck
+        - regulationAccountType
+        - account
+    
+    BankAccount:
+      type: object
+      properties:
+        bankAccountUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор банковского счета
+        organizationUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор организации
+        accountNumber:
+          type: string
+          description: Номер банковского счета
+          maxLength: 20
+        bankUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор банка
+        divisionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Подразделение (необязательное поле)
+          nullable: true
+        name:
+          type: string
+          description: Наименование банковского счета (по умолчанию последние 4 цифры счета + название банка)
+        exchangeWithBank:
+          type: object
+          properties:
+            directExchange:
+              type: boolean
+              description: Флаг, указывающий, что есть прямой обмен с банком
+            protocol1C:
+              type: object
+              properties:
+                compatibilityWithBank:
+                  type: string
+                  description: Совместимость с банком (по умолчанию "Универсальный BClient")
+                encoding:
+                  type: string
+                  enum:
+                    - windows
+                    - dos
+                  description: 'Кодировка для обмена (возможные значения: windows, dos)'
+                uploadFile:
+                  type: string
+                  maxLength: 2048
+                  description: Путь к файлу загрузки
+                downloadFile:
+                  type: string
+                  maxLength: 2048
+                  description: Путь к файлу выгрузки
+            disableExchange:
+              type: boolean
+              description: Флаг, указывающий, что обмен с банком отключен
+        description:
+          type: string
+          description: Описание банковского счета
+          maxLength: 2048
+      required:
+        - organizationUid
+        - accountNumber
+        - bankUid
+
+    Organization:
+      type: object
+      properties:
+        organizationUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор организации
+        organizationType:
+          type: string
+          description: Тип организации
+          enum:
+            - IP
+            - OOO
+        individualEntrepreneur:
+          type: object
+          description: null если выбран ООО
+          nullable: true
+          properties:
+            ogrnip:
+              type: string
+              description: ОГРНИП (для ИП)
+            registrationCertificate:
+              type: object
+              properties:
+                regNumber:
+                  type: string
+                  description: Регистрационный номер свидетельства о регистрации (для ИП)
+                validFrom:
+                  type: string
+                  format: date
+                  description: Действует с (для ИП)
+        OOO:
+          type: object
+          description: null если выбран ИП
+          nullable: true
+          properties:
+            kpp:
+              type: string
+              description: КПП (для ООО)
+            ogrn:
+              type: string
+              description: ОГРН (для ООО)
+            registrationDate:
+              type: string
+              format: date
+              description: Дата регистрации (для ООО)
+        officialName:
+          type: string
+          description: Полное официальное наименование организации
+          maxLength: 256
+        abbreviatedOfficialName:
+          type: string
+          description: Сокращенное официальное наименование организации
+          maxLength: 128
+        workingName:
+          type: string
+          description: Рабочее наименование организации
+          maxLength: 256
+        inn:
+          type: string
+          description: ИНН организации
+          pattern: '^\d{10,12}$'
+        okved:
+          type: string
+          description: ОКВЭД организации
+          maxLength: 128
+        okpo:
+          type: string
+          description: ОКПО организации
+          maxLength: 20
+        prefix:
+          type: string
+          description: Префикс
+          maxLength: 128
+        contactInformation:
+          type: object
+          properties:
+            legalAddress:
+              type: string
+              description: Юридический адрес
+              maxLength: 512
+            actualAddress:
+              type: string
+              description: Фактический адрес
+              maxLength: 512
+            postalAddress:
+              type: string
+              description: Почтовый адрес
+              maxLength: 512
+            phone:
+              type: string
+              description: Телефон
+              maxLength: 20
+            email:
+              type: string
+              format: email
+              description: Email
+              maxLength: 256
+            otherContacts:
+              type: array
+              description: Другие контактные данные
+              items:
+                type: string
+                maxLength: 256
+          required:
+            - legalAddress
+            - actualAddress
+            - postalAddress
+            - phone
+            - email
+        bankAccounts:
+          type: array
+          description: Массив банковских счетов, относящихся к организации
+          items:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            description: Банковские счета организации
+          nullable: true
+        description:
+          type: string
+          description: Описание организации
+          maxLength: 2048
+      required:
+        - organizationType
+        - officialName
+        - inn
+        - okved
+        - okpo
+        - prefix
+        - contactInformation
+
+
+    Country:
+      type: object
+      properties:
+        countryId:
+          type: string
+          description: Код страны
+          maxLength: 3
+        shortName:
+          type: string
+          description: Краткое название страны
+          maxLength: 128
+        fullName:
+          type: string
+          description: Полное название страны
+          maxLength: 255
+        alpha2Code:
+          type: string
+          description: Двухбуквенный код страны
+          maxLength: 2
+        alpha3Code:
+          type: string
+          description: Трехбуквенный код страны
+          maxLength: 3
+      required:
+        - number
+        - code
+        - shortName
+        - fullName
+        - alpha2Code
+        - alpha3Code
+
+    Contact:
+      type: object
+      properties:
+        contactUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор контакта
+        personUid:
+          type: string
+          description: Принадлежность физлицу (физлицо Uid)
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        contactType:
+          type: string
+          description: Тип контактных данных
+          enum: 
+            - email
+            - mobilePhone
+            - workPhone
+            - homePhone
+            - registrationAddress
+            - residentialAddress
+            - other
+        contactOtherType:
+          type: string
+          description: Собственный тип контакта
+          maxLength: 128
+        contactValue:
+          type: string
+          description: Значение контакта
+          maxLength: 1024
+        description:
+          type: string
+          description: Описание контакта (необязательное поле)
+          maxLength: 256
+      required:
+        - contactType
+        - contactValue
+        - personUid
+    
+    Document:
+      type: object
+      properties:
+        documentUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор документа
+        personUid:
+          type: string
+          description: Принадлежность физлицу (физлицо Uid)
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        documentType:
+          type: string
+          description: Вид документа
+          enum:
+            - passport
+            - driverLicense
+            - militaryID
+            - internationalPassport
+            - diploma
+            - other
+        documentSeries:
+          type: string
+          description: Серия документа
+          maxLength: 50
+        documentNumber:
+          type: string
+          description: Номер документа
+          maxLength: 50
+        issueDate:
+          type: string
+          format: date-time
+          description: Дата рождения физического лица в формате timestamp
+        expirationDate:
+          type: string
+          format: date-time
+          description: Дата рождения физического лица в формате timestamp
+        issuedBy:
+          type: string
+          description: Кем выдан документ
+          maxLength: 200
+        departmentCode:
+          type: string
+          description: Код подразделения
+          maxLength: 50
+        isIdentityDocument:
+          type: boolean
+          description: Флаг, указывающий, является ли документ удостоверяющим личность
+          default: false
+        isValid:
+          type: boolean
+          description: Флаг, указывающий, действителен ли документ
+        description:
+          type: string
+          description: Описание документа (необязательное поле)
+          maxLength: 256
+      required:
+        - documentType
+        - documentNumber
+        - personUid
+
+    Person:
+      type: object
+      properties:
+        personUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор физического лица
+        fullName:
+          type: string
+          description: ФИО
+          maxLength: 256
+        clarification:
+          type: string
+          description: Уточнение (на случай совпадающих ФИО)
+          maxLength: 256
+        email:
+          type: string
+          description: Адрес электронной почты
+          format: email
+          maxLength: 256
+        mainPhone:
+          type: string
+          description: Основной номер телефона
+          maxLength: 15
+          pattern: '^\+[0-9]{1,3}[0-9\-\s()]{5,}$'
+        gender:
+          type: string
+          description: Пол
+          enum:
+            - male
+            - female
+        birthDate:
+          type: string
+          format: date
+          description: Дата рождения физического лица в формате YYYY-MM-DD
+        department:
+          type: string
+          description: Подразделение
+          maxLength: 256
+        inn:
+          type: string
+          description: ИНН
+          maxLength: 12
+        personGroupUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Uid Группы физических лиц
+        snils:
+          type: string
+          description: СНИЛС
+          maxLength: 11
+        description:
+          type: string
+          description: Описание физического лица (необязательное поле)
+          maxLength: 256
+        contacts:
+          type: array
+          description: Массив контактов
+          items:
+            $ref: '#/components/schemas/Contact'
+        documents:
+          type: array
+          description: Массив документов
+          items:
+            $ref: '#/components/schemas/Document'
+      required:
+        - fullName
+        - gender
+        - birthDate
+
+    PersonGroup:
+      type: object
+      properties:
+        groupUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор группы
+        groupName:
+          type: string
+          description: Название группы
+          maxLength: 256
+        parentGroupId:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор родительской группы (для вложенности)
+        description:
+          type: string
+          description: Описание группы физических лиц (необязательное поле)
+          maxLength: 256
+          nullable: true
+        subgroups:
+          type: array
+          description: Список дочерних групп
+          items:
+            $ref: '#/components/schemas/PersonGroup'
+
+    Division:
+      type: object
+      properties:
+        divisionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор подразделения
+        divisionName:
+          type: string
+          description: Название подразделения
+          maxLength: 256
+        parentdivisionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор родительского подразделения (для вложенности)
+        headOfdivisionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Руководитель подразделения
+          maxLength: 256
+        description:
+          type: string
+          description: Описание подразделения (необязательное поле)
+          maxLength: 256
+        subDivisions:
+          type: array
+          description: Список дочерних подразделений
+          items:
+            $ref: '#/components/schemas/Division'
+
+    Responsibility:
+      type: object
+      properties:
+        responsibilityUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор ответственного лица
+        organizationUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор организации
+        position:
+          type: string
+          description: Должность ответственного лица
+          enum:
+            - generalDirector
+            - chiefAccountant
+        otherPosition:
+          type: string
+          description: Рабочее наименование ответственного лица (в случае действия по доверенности)
+        personUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор физического лица
+        basis:
+          type: string
+          description: Основание ответственности
+          enum:
+            - mainPerson
+            - powerOfAttorney
+        powerOfAttorney:
+          type: string
+          description: Информация о доверенности (только если основание - по доверенности)
+          maxLength: 256
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+              description: 'Дата начала периода действия ответственности (формат: YYYY-MM-DD)'
+            to:
+              type: string
+              format: date
+              description: 'Дата окончания периода действия ответственности (формат: YYYY-MM-DD)'
+              nullable: true
+        isGeneralDirectorAndChiefAccountant:
+          type: boolean
+          description: Флаг, указывающий, что генеральный директор может являться и главным бухгалтером
+      required:
+        - organizationUid
+        - position
+        - personUid
+        - basis
+        - period
+
+    Cashbox:
+      type: object
+      properties:
+        cashboxUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор кассы
+        organizationUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор организации
+        cashboxName:
+          type: string
+          description: Наименование кассы
+          maxLength: 256
+        divisionUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: Идентификатор подразделения (структуры организации)
+        cashCollectionTerm:
+          type: integer
+          description: Срок инкасации кассы (в днях)
+          nullable: true
+        recipients:
+          type: array
+          description: Список касс получателей (их cashboxUid)
+          items:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            description: cashboxUid кассы получателя
+          nullable: true
+      required:
+        - organizationUid
+        - cashboxName
+
+
+  parameters:
+    SortParameter:
+      name: sort
+      in: query
+      description: 'Массив выражений сортировки для параметра `sort` запроса.'
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SortExpression'
+
+    FilterParameter:
+      description: Массив выражений фильтрации для параметра `filter` запроса
+      in: query
+      name: filter
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/FilterExpression'
+
+    SelectParameter:
+      name: select
+      in: query
+      description: 'Массив выражений выборки для параметра `select` запроса.'
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SelectExpression'
+
+    OffsetParameter:
+      name: offset
+      in: query
+      description: Количество ресурсов, исключаемых из вывода запроса.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+
+    LimitParameter:
+      name: limit
+      in: query
+      description: Количество ресурсов, которые должны быть возвращены в выводе.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 500
+        default: 100
+
+    ServiceUidParameter:
+      name: serviceUid
+      in: query
+      description: Идентификатор сервиса
+      required: true
+      schema:
+        type: string
+        format: uuid
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
