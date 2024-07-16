@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Auth Service API
+  version: "1.0"
+servers:
+- url: http://localhost:5000
+paths:
+  /login:
+    post:
+      operationId: endpoints_auth_login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoints_auth_login_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoints_auth_login_200_response'
+          description: Successful login
+        "400":
+          description: Invalid username or password
+        "401":
+          description: Unauthorized
+      summary: Login a user
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /protected:
+    get:
+      operationId: endpoints_auth_protected
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoints_auth_protected_200_response'
+          description: Successful response
+        "401":
+          description: Unauthorized it
+      security:
+      - bearerAuth: []
+      summary: Protected endpoint
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+components:
+  schemas:
+    endpoints_auth_protected_200_response:
+      example:
+        logged_in_as: logged_in_as
+      properties:
+        logged_in_as:
+          title: logged_in_as
+          type: string
+      title: endpoints_auth_protected_200_response
+      type: object
+    endpoints_auth_login_200_response:
+      example:
+        access_token: access_token
+      properties:
+        access_token:
+          title: access_token
+          type: string
+      title: endpoints_auth_login_200_response
+      type: object
+    endpoints_auth_login_request:
+      properties:
+        username:
+          title: username
+          type: string
+        password:
+          title: password
+          type: string
+      required:
+      - password
+      - username
+      title: endpoints_auth_login_request
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-bearerInfoFunc: openapi_server.controllers.security_controller.info_from_bearerAuth

@@ -1,21 +1,20 @@
-from flask import Flask
+import connexion
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from db.database import Session  # Изменен импорт
-from endpoints.auth import create_auth_blueprint
+from db.database import Session
+from endpoints.auth import auth_bp
 
-#Для развертывания в продакшн рекомендуется использовать серверы,
-#  такие как gunicorn или uwsgi в связке с обратным прокси-сервером, таким как Nginx.
+# Создаем приложение Connexion
+app = connexion.App(__name__, specification_dir='./specifications/')
+app.add_api('authService.yaml')
 
-app = Flask(__name__)
-CORS(app)
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Секретный ключ для создания JWT
+# Получаем Flask приложение из Connexion
+flask_app = app.app
 
-jwt = JWTManager(app)
+CORS(flask_app)
+flask_app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
 
-# Создаем и регистрируем blueprint для аутентификации
-auth_bp = create_auth_blueprint(Session)
-app.register_blueprint(auth_bp)
+jwt = JWTManager(flask_app)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000)

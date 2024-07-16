@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Smartbox ERP. Auth Service
+  description: API сервиса Авторизации, Управления пользователями, Ролями, Сервисами и Подключаемыми модулями
+  version: '1.0'
+
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /login:
+    post:
+      summary: Login a user
+      operationId: endpoints.auth.login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '400':
+          description: Invalid username or password
+        '401':
+          description: Unauthorized
+
+  /protected:
+    get:
+      summary: Protected endpoint
+      operationId: endpoints.auth.protected
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logged_in_as:
+                    type: string
+        '401':
+          description: Unauthorized it
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
