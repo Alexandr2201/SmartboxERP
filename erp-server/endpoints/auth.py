@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import text
 import re
@@ -52,5 +52,11 @@ def create_auth_blueprint(Session):
             return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
         finally:
             session.close()
+
+    @auth_bp.route('/protected', methods=['GET'])
+    @jwt_required()
+    def protected():
+        current_user = get_jwt_identity()
+        return jsonify(logged_in_as=current_user), 200
 
     return auth_bp
