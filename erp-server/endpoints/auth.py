@@ -2,27 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import text
-import re
+from validations.auth_validation import validate_username, validate_password
 
 def create_auth_blueprint(Session):
     auth_bp = Blueprint('auth_bp', __name__)
-
-    def validate_username(username):
-        if not 2 <= len(username) <= 255:
-            return False
-        # Простая проверка на SQL инъекции
-        if re.search(r"[;'\"]", username):
-            return False
-        return True
-
-    def validate_password(password):
-        if not 8 <= len(password) <= 255:
-            return False
-        if not re.search(r"[a-z]", password):
-            return False
-        if not re.search(r"[A-Z]", password):
-            return False
-        return True
 
     @auth_bp.route('/login', methods=['POST'])
     def login():
