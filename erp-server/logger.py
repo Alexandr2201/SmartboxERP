@@ -1,8 +1,10 @@
 import logging
 import os
+from config import Config
 
 # Функция для создания и настройки логгера
 def setup_logger(logger_name, log_file, level=logging.INFO):
+    # Создаем папку для хранения логов, если её нет
     log_dir = './logs'
     os.makedirs(log_dir, exist_ok=True)
 
@@ -10,8 +12,8 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     logger.setLevel(level)
 
     # Создаем файловый обработчик логов
-    log_file = os.path.join(log_dir, log_file)
-    file_handler = logging.FileHandler(log_file)
+    log_file_path = os.path.join(log_dir, log_file)
+    file_handler = logging.FileHandler(log_file_path)
 
     # Форматируем сообщения логов
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -22,7 +24,9 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 
     return logger
 
+# Преобразование уровня логирования из строки в соответствующий уровень
+log_level = getattr(logging, Config.LOG_LEVEL.upper(), logging.INFO)
 # Создание логгеров для разных сервисов
-auth_logger = setup_logger('auth_service_logger', 'Auth_Service1.log')
+auth_logger = setup_logger('auth_service_logger', 'Auth_Service.log', level=log_level)
 # Можно создать другие логгеры для других сервисов, например:
 # user_logger = setup_logger('user_service_logger', 'User_Service.log')
