@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import text
 from validations.auth_validation import validate_username, validate_password
-from logger import logger
+from logger import auth_logger as logger  # Используем логгер auth_service_logger
 
 def create_auth_blueprint(Session):
     auth_bp = Blueprint('auth_bp', __name__)
@@ -15,13 +15,16 @@ def create_auth_blueprint(Session):
         password = data.get('password', None)
 
         # Валидация логина и пароля
-        if not validate_username(username):
-            logger.error("Invalid username. Username must be between 2 and 255 characters and not contain any special characters")
-            return jsonify({"error": "Invalid username. Username must be between 2 and 255 characters and not contain any special characters."}), 400
-        if not validate_password(password):
-            logger.error("Invalid password. Password must be between 8 and 255 characters long and contain both upper and lower case letters")
-            return jsonify({"error": "Invalid password. Password must be between 8 and 255 characters long and contain both upper and lower case letters."}), 400
+        valid, error_message = validate_username(username)
+        if not valid:
+            logger.error(error_message)
+            return jsonify({"error": error_message}), 400
 
+        valid, error_message = validate_password(password)
+        if not valid:
+            logger.error(error_message)
+            return jsonify({"error": error_message}), 400
+        
         # Проверка пользователя в базе данных
         session = Session()
         try:
@@ -39,6 +42,7 @@ def create_auth_blueprint(Session):
             logger.error("Bad username or password")
             return jsonify({"error": "Bad username or password"}), 401
         except Exception as e:
+            logger.error(f"An unexpected error occurred: {str(e)}")
             return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
         finally:
             session.close()
