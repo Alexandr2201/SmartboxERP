@@ -1,6 +1,6 @@
 import logging
 import os
-from config import Config
+from config import config
 
 # Функция для создания и настройки логгера
 def setup_logger(logger_name, log_file, level=logging.INFO):
@@ -25,7 +25,7 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     return logger
 
 # Преобразование уровня логирования из строки в соответствующий уровень
-log_level = getattr(logging, Config.LOG_LEVEL.upper(), logging.INFO)
+log_level = getattr(logging, config.LOG_LEVEL.upper(), logging.INFO)
 # Создание логгеров для разных сервисов
 auth_logger = setup_logger('auth_service_logger', 'Auth_Service.log', level=log_level)
 # Можно создать другие логгеры для других сервисов, например:

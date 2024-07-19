@@ -51,7 +51,7 @@ def create_auth_blueprint(Session):
     @jwt_required()
     def protected():
         current_user = get_jwt_identity()
-        logger.info(f'Checked user: {current_user}')
+        logger.debug(f'Checked user: {current_user}')
         return jsonify(logged_in_as=current_user), 200
 
     return auth_bp
