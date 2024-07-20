@@ -27,4 +27,4 @@ class Config:
         return self.config.get('log_level', 'INFO').upper()
 
 # Инициализация конфигурации
-config = Config()
+config_instance = Config()
