@@ -1,6 +1,6 @@
 import pytest
 import logging
-from src.logger import auth_logger, setup_logger
+from logger import auth_logger, setup_logger
 
 def test_logger_setup():
     logger = setup_logger('test_logger', 'test.log', level=logging.DEBUG)

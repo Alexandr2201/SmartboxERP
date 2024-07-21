@@ -19,8 +19,9 @@ def app():
     yield flask_app
 
 @pytest.fixture(scope='module')
-def client(app):
-    return app.test_client()
+def test_client():
+    with flask_app.test_client() as client:
+        yield client
 
 @pytest.fixture(scope='module')
 def init_database():
