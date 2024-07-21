@@ -1,0 +1,13 @@
+Flask==2.3.2
+Flask-JWT-Extended==4.6.0
+Flask-Cors==4.0.1
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+fastapi
+pydantic
+uvicorn[standard]
+pyyaml
+openapi-core
+pytest
+pytest-cov
+httpx

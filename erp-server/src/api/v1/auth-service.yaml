@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: Smartbox ERP. Auth Service
+  description: API сервиса Авторизации, Управления пользователями, Ролями, Сервисами и Подключаемыми модулями
+  version: 1.0.0
+
+servers:
+  - url: https://localhost:5000/api/authService
+  - url: http://localhost:5000/api/authService
+
+tags:
+  - name: Авторизация
+    description: Авторизация пользователя
+  - name: Пользователи
+    description: Управление пользователями
+  - name: Роли
+    description: Управление ролями
+  - name: Права доступа
+    description: Управление правами доступа
+  - name: Сервисы
+    description: Управление сервисами
+  - name: Модули
+    description: Управление модулями
+  - name: Лицензирование
+    description: Управление лицензиями
+
+paths:
+  /user:
+    post:
+      security:
+      - bearer: []
+      summary: Создание пользователя
+      description: Создание нового пользователя
+      tags:
+        - Пользователи
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        userUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        username:
+          type: string
+          minLength: 3
+          maxLength: 128
+        password:
+          type: string
+          minLength: 8
+          maxLength: 255
+        personUid:
+          type: string
+          format: uuid
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        description:
+          type: string
+          description: Дополнительная информация о пользователе
+          minLength: 1
+          maxLength: 255
+
+    Response:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/ResponseMetadata'
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/User'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+
+    ResponseMetadata:
+      type: object
+      properties:
+        pagingInfo:
+          $ref: '#/components/schemas/PagingInformation'
+      nullable: true
+
+    PagingInformation:
+      type: object
+      required:
+        - total
+        - count
+        - offset
+      properties:
+        total:
+          type: integer
+          format: int32
+          description: Number of total resources.
+        count:
+          type: integer
+          format: int32
+          description: Number of resources on the current page.
+        offset:
+          type: integer
+          format: int32
+          description: Number of resources that are skipped.
+
+    ResponseError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+          readOnly: true
+      nullable: true
+
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

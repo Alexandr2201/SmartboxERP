@@ -5,7 +5,7 @@
         "port": 5432,
         "user": "postgres",
         "password": "A12345aa",
-        "dbname": "Test_Smartbox SQL"
+        "dbname": "Smartbox SQL"
     },
     "log_level": "WARNING"
 }

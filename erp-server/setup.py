@@ -13,6 +13,16 @@ setup(
         'sqlalchemy',
         'flask-jwt-extended',
         'flask-cors',
+        "fastapi",
+        "pydantic",
+        "uvicorn[standard]",
+        "pyyaml",
+        "openapi-core",
         # добавьте другие зависимости по необходимости
+    ],
+    tests_require=[
+        "pytest",
+        "pytest-cov",
+        "httpx"
     ],
 )

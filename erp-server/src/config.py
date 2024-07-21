@@ -19,6 +19,9 @@ class Config:
     @property
     def DATABASE_URI(self):
         db_config = self.config.get('database', {})
+        db_print = f"postgresql://{db_config.get('user')}:{db_config.get('password')}@" \
+               f"{db_config.get('host')}:{db_config.get('port')}/{db_config.get('dbname')}"
+        print(db_print)
         return f"postgresql://{db_config.get('user')}:{db_config.get('password')}@" \
                f"{db_config.get('host')}:{db_config.get('port')}/{db_config.get('dbname')}"
 

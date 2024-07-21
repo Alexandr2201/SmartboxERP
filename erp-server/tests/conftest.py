@@ -27,4 +27,4 @@ def test_client():
 def init_database():
     Base.metadata.create_all(engine)
     yield Session()  # Возвращаем объект сессии для использования в тестах
-    Base.metadata.drop_all(engine)
+    #Base.metadata.drop_all(engine)
