@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+#pip install -e .
+
 setup(
     name='erp_server',
     version='0.1',
