@@ -1,0 +1,11 @@
+{
+    "jwt_secret_key": "your_jwt_secret_key",
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "user": "postgres",
+        "password": "A12345aa",
+        "dbname": "Smartbox SQL"
+    },
+    "log_level": "WARNING"
+}

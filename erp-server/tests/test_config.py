@@ -1,5 +1,5 @@
 import pytest
-from config import Config
+from src.config import Config
 
 def test_load_config():
     config = Config('server.config.json')
